@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: converter
-          image: deepenc/converter
+          image: deepenc/converter-service
           envFrom:
             - configMapRef:
                 name: converter-configmap
