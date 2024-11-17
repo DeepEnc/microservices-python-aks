@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: notification
-          image: deepenc/notification
+          image: deepenc/notification-service
           envFrom:
             - configMapRef:
                 name: notification-configmap
