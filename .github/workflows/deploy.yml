@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - 0.1-develop  # Trigger on the specific branch
+      - '0.1-develop'  # Trigger on the specific branch
 
 jobs:
   lint:
