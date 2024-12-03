@@ -5,6 +5,13 @@ on:
     branches:
       - 0.1-develop
 
+env:
+  CLUSTER_NAME: k8s-cluster
+  RESOURCE_GROUP: deepenc-cluster
+  REGISTRY: ghcr.io
+  LOCATION: eastus
+  NODE_SIZE: Standard_D8ds_v5
+
 jobs:
   lint:
     name: Linting and Validation
@@ -49,7 +56,7 @@ jobs:
 
       - name: Log in with service principle to Azure
         run: |
-          az login --service-principal --username ${{ secrets.AZURE_APP_ID }} --password ${{ secrets.AZURE_PASSWORD_ID }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          az login --service-principal --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_SECRET_ID }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
       - name: creating resource group
         run: |
