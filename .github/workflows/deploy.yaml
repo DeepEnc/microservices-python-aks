@@ -1,0 +1,95 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - 0.1-develop  # Trigger on the specific branch
+
+jobs:
+  lint:
+    name: Linting and Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl bash file
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+      - name: Install KubeLinter
+        run: |
+          curl -sSL https://github.com/stackrox/kube-linter/releases/download/0.9.0/kube-linter-linux.tar.gz | tar -xz
+          sudo mv kube-linter /usr/local/bin/
+
+      - name: Lint Kubernetes manifests with KubeLinter
+        run: |
+          kube-linter lint ./kubernetes-manifests --format sarif > kube-linter-results.sarif || true
+
+      - name: Upload Lint Results (Optional)
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: kube-linter-results.sarif
+
+      - name: Validate Kubernetes manifests with kubeval
+        uses: garethr/kubeval-action@v0.1
+        with:
+          kubernetes-version: '1.23.0'
+
+      - name: Validate Helm charts
+        run: helm lint ./helm-chart  # Modify path if necessary
+
+  setup:
+    name: Setup Azure and Kubernetes Context
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in with service principle to Azure
+        run: |
+          az login --service-principal --username ${{ secrets.AZURE_APP_ID }} --password ${{ secrets.AZURE_PASSWORD_ID }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: creating resource group
+        run: |
+          az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
+
+      - name: creating azure aks
+        run: |
+          az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
+          az aks create --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} --location ${{ env.LOCATION }} --kubernetes-version 1.28.3 --tier standard --enable-cluster-autoscaler --node-count 2 --min-count 2 --max-count 5 --max-pods 110 --node-vm-size ${{ env.NODE_SIZE }} --network-plugin azure --network-policy azure --load-balancer-sku standard --enable-addons monitoring --generate-ssh-keys
+
+      - name: connect to AKS cluster
+        run: |
+          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }}
+
+      - name: Save kubeconfig
+        uses: actions/upload-artifact@v3
+        with:
+          name: kubeconfig
+          path: .kube/config
+
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Retrieve kubeconfig
+        uses: actions/download-artifact@v3
+        with:
+          name: kubeconfig
+          path: .kube/
+
+      - name: Deploy Kubernetes Manifests
+        run: |
+          kubectl apply -f ./kubernetes-manifests
+
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/my-deployment -n production
+          kubectl get all -n production
