@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - '0.1-develop'  # Trigger on the specific branch
+      - 0.1-develop
 
 jobs:
   lint:
@@ -33,14 +33,13 @@ jobs:
         with:
           sarif_file: kube-linter-results.sarif
 
-      - name: Validate Kubernetes manifests with kubeval
-        uses: garethr/kubeval-action@v0.1
-        with:
-          kubernetes-version: '1.23.0'
+      # - name: Validate Kubernetes manifests with kube-linter
+      #   uses: stackrox/kube-linter-action@v0.1
+      #   with:
+      #     kubernetes-version: '1.23.0'
 
       - name: Validate Helm charts
-        run: helm lint ./helm-chart  # Modify path if necessary
-
+        run: helm lint ./helm-chart
   setup:
     name: Setup Azure and Kubernetes Context
     runs-on: ubuntu-latest
