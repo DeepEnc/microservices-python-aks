@@ -63,7 +63,8 @@ jobs:
       #     [[ "${{ steps.kube-linter-action-scan.outcome }}" == "success" ]]
 
       - name: Validate Helm charts
-        run: helm lint ./helm-chart
+        run: |
+          find ./src -type d -name 'Chart.yaml' -execdir helm lint . \;                            # helm lint ./helm-chart
         
   # setup:
   #   name: Setup Azure and Kubernetes Context
