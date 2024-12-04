@@ -30,16 +30,16 @@ jobs:
         shell: bash
         run: mkdir -p ../results
       
-      - name: Find manifests directories
-        run: |
-          find ./src -type d -name "manifest" | tr '\n' ' ' > manifests_dirs.txt
+      # - name: Find manifests directories
+      #   run: |
+      #     find ./src -type d -name "manifest" | tr '\n' ' ' > manifests_dirs.txt
       
 
       - name: Scan the files with kube-linter
         uses: stackrox/kube-linter-action@v1.0.5
         id: kube-linter-action-scan
         with:
-          directory: $(cat manifests_dirs.txt)
+          directory: /src/auth-service/manifest           # $(cat manifests_dirs.txt)
           # config: .kube-linter/config.yaml
           format: sarif
           output-file: ../results/kube-linter.sarif
