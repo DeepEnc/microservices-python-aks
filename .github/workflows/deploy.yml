@@ -35,10 +35,10 @@ jobs:
         id: kube-linter-action-scan
         with:
           directory: |
-            src/auth-service/manifest
-            src/converter-service/manifest
-            src/gateway-service/manifest
-            src/notification-service/manifest
+            ./src/auth-service/manifest
+            ./src/converter-service/manifest
+            ./src/gateway-service/manifest
+            ./src/notification-service/manifest
           format: sarif
           output-file: ../results/kube-linter.sarif
         continue-on-error: true
