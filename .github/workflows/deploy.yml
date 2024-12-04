@@ -25,25 +25,32 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y curl bash file
           # echo "<DOCKER_PASSWORD>" | docker login -u "<DOCKER_USERNAME>" --password-stdin
+     
+      - name: Create ../results directory for SARIF report files
+        shell: bash
+        run: mkdir -p ../results
 
-      - name: Install KubeLinter
-        run: |
-          curl -sSL https://github.com/stackrox/kube-linter/releases/download/0.9.0/kube-linter-linux.tar.gz | tar -xz
-          sudo mv kube-linter /usr/local/bin/
-
-      - name: Lint Kubernetes manifests with KubeLinter
-        run: |
-          kube-linter lint ./kubernetes-manifests --format sarif > kube-linter-results.sarif || true
-
-      - name: Upload Lint Results (Optional)
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Scan the files with kube-linter
+        uses: stackrox/kube-linter-action@v1.0.5
+        id: kube-linter-action-scan
         with:
-          sarif_file: kube-linter-results.sarif
+          directory: |
+            src/auth-service/manifest
+            src/converter-service/manifest
+            src/gateway-service/manifest
+            src/notification-service/manifest
+          format: sarif
+          output-file: ../results/kube-linter.sarif
+        continue-on-error: true
 
-      # - name: Validate Kubernetes manifests with kube-linter
-      #   uses: stackrox/kube-linter-action@v0.1
-      #   with:
-      #     kubernetes-version: '1.23.0'
+      - name: Upload SARIF Report file to Github
+        uses: github/codeql-action/upload-sarif@v3
+
+      - name: Verify kube-linter-action succeeded
+        shell: bash
+        run: |
+          echo "If this step fails, kube-linter found issues. Check the output of the scan step above."
+          [[ "${{ steps.kube-linter-action-scan.outcome }}" == "success" ]]
 
       - name: Validate Helm charts
         run: helm lint ./helm-chart
