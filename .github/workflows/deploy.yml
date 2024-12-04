@@ -40,7 +40,7 @@ jobs:
         id: kube-linter-action-scan
         with:
           directory: $(cat manifests_dirs.txt)
-          config: .kube-linter/config.yaml
+          # config: .kube-linter/config.yaml
           format: sarif
           output-file: ../results/kube-linter.sarif
         continue-on-error: true
