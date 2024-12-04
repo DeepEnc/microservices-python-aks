@@ -39,7 +39,7 @@ jobs:
         uses: stackrox/kube-linter-action@v1.0.5
         id: kube-linter-action-scan
         with:
-          directory: /src/auth-service/manifest           # $(cat manifests_dirs.txt)
+          directory: ./src/auth-service/manifest           # $(cat manifests_dirs.txt)
           # config: .kube-linter/config.yaml
           format: sarif
           output-file: ../results/kube-linter.sarif
