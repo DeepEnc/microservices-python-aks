@@ -38,7 +38,7 @@ jobs:
 
       - name: Create results directory
         run: mkdir -p results
-      
+
       - name: Scan the files with kube-linter
         uses: stackrox/kube-linter-action@v1.0.5
         id: kube-linter-action-scan
@@ -52,6 +52,9 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results/kube-linter.sarif
+      
+      - name: List contents of the results directory
+        run: ls -R results 
 
       - name: Verify kube-linter-action succeeded
         shell: bash
