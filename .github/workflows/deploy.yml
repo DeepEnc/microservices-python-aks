@@ -69,7 +69,8 @@ jobs:
 
       - name: Validate Helm charts
         run: |
-          find ./helm-chart -type d -name 'Chart.yaml' -execdir helm lint . --debug \;                            # helm lint ./helm-chart
+          find ./helm-chart -type d -name 'Chart.yaml' -execdir echo "Linting directory: {}" \;
+          find ./helm-chart -type d -name 'Chart.yaml' -execdir helm lint . --debug -v=10 \;                            # helm lint ./helm-chart
         
   # setup:
   #   name: Setup Azure and Kubernetes Context
