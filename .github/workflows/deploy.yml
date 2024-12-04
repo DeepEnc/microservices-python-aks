@@ -43,7 +43,7 @@ jobs:
           directory: src/auth-service/manifest
           format: sarif
           output-file: results/kube-linter.sarif
-        continue-on-error: true
+        # continue-on-error: true
 
       - name: Upload SARIF Report file to Github
         uses: github/codeql-action/upload-sarif@v3
