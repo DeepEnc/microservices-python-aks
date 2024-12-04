@@ -25,26 +25,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y curl bash file
           # echo "<DOCKER_PASSWORD>" | docker login -u "<DOCKER_USERNAME>" --password-stdin
-     
-      - name: Create ../results directory for SARIF report files
-        shell: bash
-        run: mkdir -p ../results
       
       # - name: Find manifests directories
       #   run: |
       #     find ./src -type d -name "manifest" | tr '\n' ' ' > manifests_dirs.txt
       
-      - name: Read manifest directories from file
-        run: |
-          manifest_dirs=$(cat manifests_dirs.txt)  
-          echo "Directories to lint: $manifest_dirs"
-          echo "manifest_dirs=$manifest_dirs" >> $GITHUB_ENV 
+      # - name: Read manifest directories from file
+      #   run: |
+      #     manifest_dirs=$(cat manifests_dirs.txt)  
+      #     echo "Directories to lint: $manifest_dirs"
+      #     echo "manifest_dirs=$manifest_dirs" >> $GITHUB_ENV 
 
       - name: Scan the files with kube-linter
         uses: stackrox/kube-linter-action@v1.0.5
         id: kube-linter-action-scan
         with:
-          directory: ${{ env.manifest_dirs }} 
+          directory: src/auth-service/manifest
           format: sarif
           output-file: results/kube-linter.sarif
         continue-on-error: true
