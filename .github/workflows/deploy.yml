@@ -62,15 +62,24 @@ jobs:
       #     echo "If this step fails, kube-linter found issues. Check the output of the scan step above."
       #     [[ "${{ steps.kube-linter-action-scan.outcome }}" == "success" ]]
 
+      - name: Install kubeval
+        run: |
+          curl -sLO https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+          tar xf kubeval-linux-amd64.tar.gz
+          sudo mv kubeval /usr/local/bin/
+
+      # Validate Kubernetes Manifests
+      - name: Validate Kubernetes Files
+        run: |
+          set -e
+          for file in $(find src -type f -path '*/manifest/*.yaml'); do
+            echo "Validating $file"
+            kubeval "$file"
+          done
+
       - name: Install Helm
         run: |
           curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-
-
-      # - name: Validate Helm charts
-      #   run: |
-      #     find ./helm-chart -type d -name 'Chart.yaml' -execdir echo "Linting directory: {}" \;
-      #     find ./helm-chart -type d -name 'Chart.yaml' -execdir helm lint . --debug -v=10 \;                            # helm lint ./helm-chart
         
       - name: Lint Helm Charts
         run: |
