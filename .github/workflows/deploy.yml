@@ -26,28 +26,6 @@ jobs:
           sudo apt-get install -y curl bash file
           # echo "<DOCKER_PASSWORD>" | docker login -u "<DOCKER_USERNAME>" --password-stdin
       
-      # - name: Find manifests directories
-      #   run: |
-      #     find ./src -type d -name "manifest" | tr '\n' ' ' > manifests_dirs.txt
-      
-      # - name: Read manifest directories from file
-      #   run: |
-      #     manifest_dirs=$(cat manifests_dirs.txt)  
-      #     echo "Directories to lint: $manifest_dirs"
-      #     echo "manifest_dirs=$manifest_dirs" >> $GITHUB_ENV 
-
-      # - name: Create results directory
-      #   run: mkdir -p results
-
-      # - name: Scan the files with kube-linter
-      #   uses: stackrox/kube-linter-action@v1.0.5
-      #   id: kube-linter-action-scan
-      #   with:
-      #     directory: src/auth-service/manifest
-      #     format: sarif
-      #     output-file: results/kube-linter.sarif
-      #   # continue-on-error: true
-
       - name: Lint Kubernetes Manifests
         uses: stackrox/kube-linter-action@v1.0.5
         with:
@@ -57,11 +35,6 @@ jobs:
         continue-on-error: true  # This allows the workflow to continue even if errors occur
         id: lint
 
-      # - name: Save Linting Errors
-      #   run: |
-      #     echo "Linting errors for Kubernetes manifests:" > linting_errors.txt
-      #     echo "${{ steps.lint.outputs.linter_results }}" >> linting_errors.txt
-      #     cat linting_errors.txt
       - name: Check Linter Output
         run: |
           if [[ -s linting_results.txt ]]; then
@@ -70,20 +43,6 @@ jobs:
           else
             echo "No linting errors found."
           fi
-
-      # - name: Upload SARIF Report file to Github
-      #   uses: github/codeql-action/upload-sarif@v3
-      #   with:
-      #     sarif_file: results/kube-linter.sarif
-      
-      # - name: List contents of the results directory
-      #   run: ls -R results 
-
-      # - name: Verify kube-linter-action succeeded
-      #   shell: bash
-      #   run: |
-      #     echo "If this step fails, kube-linter found issues. Check the output of the scan step above."
-      #     [[ "${{ steps.kube-linter-action-scan.outcome }}" == "success" ]]
 
       # - name: Install kubeval
       #   run: |
