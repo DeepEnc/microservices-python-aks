@@ -58,7 +58,7 @@ jobs:
       - name: Save Linting Errors
         run: |
           echo "Linting errors for Kubernetes manifests:" > linting_errors.txt
-          cat ${{ steps.lint.outputs.linter_results }} >> linting_errors.txt
+          echo "${{ steps.lint.outputs.linter_results }}" >> linting_errors.txt
           cat linting_errors.txt
 
       # - name: Upload SARIF Report file to Github
