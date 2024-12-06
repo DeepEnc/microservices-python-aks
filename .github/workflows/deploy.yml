@@ -102,8 +102,14 @@ jobs:
               echo "Linting chart in $dir"
               helm lint "$dir"
             fi
-          done  
+          done
 
+      - name: Upload Linting Errors Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: linting-errors
+          path: linting_errors.txt
+        
   # setup:
   #   name: Setup Azure and Kubernetes Context
   #   runs-on: ubuntu-latest

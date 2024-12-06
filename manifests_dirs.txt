@@ -1,1 +1,0 @@
-./src/auth-service/manifest ./src/converter-service/manifest ./src/gateway-service/manifest
