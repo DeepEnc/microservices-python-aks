@@ -117,8 +117,8 @@ jobs:
       - name: Upload Linting Errors Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linting-errors
-          path: linting_errors.txt
+          name: linting-results
+          path: linting_results.txt
         
   # setup:
   #   name: Setup Azure and Kubernetes Context
