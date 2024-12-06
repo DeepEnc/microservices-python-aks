@@ -62,11 +62,17 @@ jobs:
       #     echo "If this step fails, kube-linter found issues. Check the output of the scan step above."
       #     [[ "${{ steps.kube-linter-action-scan.outcome }}" == "success" ]]
 
-      - name: Install kubeval
+      # - name: Install kubeval
+      #   run: |
+      #     curl -sLO https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+      #     tar xf kubeval-linux-amd64.tar.gz
+      #     sudo mv kubeval /usr/local/bin/
+
+      - name: Install KubeLinter
         run: |
-          curl -sLO https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
-          tar xf kubeval-linux-amd64.tar.gz
-          sudo mv kubeval /usr/local/bin/
+          curl -sLO https://github.com/stackrox/kube-linter/releases/latest/download/kube-linter-linux-amd64.tar.gz
+          tar -xzf kube-linter-linux-amd64.tar.gz kube-linter
+          sudo mv kube-linter /usr/local/bin/
 
       # Validate Kubernetes Manifests
       - name: Validate Kubernetes Files
