@@ -48,6 +48,12 @@ jobs:
       #     output-file: results/kube-linter.sarif
       #   # continue-on-error: true
 
+      - name: Lint Kubernetes Manifests
+        uses: stackrox/kube-linter-action@v1.0.5
+        with:
+          directory: src
+
+
       # - name: Upload SARIF Report file to Github
       #   uses: github/codeql-action/upload-sarif@v3
       #   with:
@@ -68,20 +74,14 @@ jobs:
       #     tar xf kubeval-linux-amd64.tar.gz
       #     sudo mv kubeval /usr/local/bin/
 
-      - name: Install KubeLinter
-        run: |
-          curl -sLO https://github.com/stackrox/kube-linter/releases/latest/download/kube-linter-linux-amd64.tar.gz
-          tar -xzf kube-linter-linux-amd64.tar.gz kube-linter
-          sudo mv kube-linter /usr/local/bin/
-
       # Validate Kubernetes Manifests
-      - name: Validate Kubernetes Files
-        run: |
-          set -e
-          for file in $(find src -type f -path '*/manifest/*.yaml'); do
-            echo "Validating $file"
-            kube-linter lint "$file"
-          done
+      # - name: Validate Kubernetes Files
+      #   run: |
+      #     set -e
+      #     for file in $(find src -type f -path '*/manifest/*.yaml'); do
+      #       echo "Validating $file"
+      #       kubeval "$file"
+      #     done
 
       - name: Install Helm
         run: |
