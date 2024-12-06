@@ -52,20 +52,24 @@ jobs:
         uses: stackrox/kube-linter-action@v1.0.5
         with:
           directory: src
+          format: plain
+          output-file: linting_results.txt
         continue-on-error: true  # This allows the workflow to continue even if errors occur
         id: lint
-      
-      - name: Print Linter Output for Debugging
-        run: |
-          echo "Linter output:"
-          echo "${{ steps.lint.outputs.linter_results }}"
-      
 
-      - name: Save Linting Errors
+      # - name: Save Linting Errors
+      #   run: |
+      #     echo "Linting errors for Kubernetes manifests:" > linting_errors.txt
+      #     echo "${{ steps.lint.outputs.linter_results }}" >> linting_errors.txt
+      #     cat linting_errors.txt
+      - name: Check Linter Output
         run: |
-          echo "Linting errors for Kubernetes manifests:" > linting_errors.txt
-          echo "${{ steps.lint.outputs.linter_results }}" >> linting_errors.txt
-          cat linting_errors.txt
+          if [[ -s linting_results.txt ]]; then
+            echo "Linting errors found:"
+            cat linting_results.txt
+          else
+            echo "No linting errors found."
+          fi
 
       # - name: Upload SARIF Report file to Github
       #   uses: github/codeql-action/upload-sarif@v3
