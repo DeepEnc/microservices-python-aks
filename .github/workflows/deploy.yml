@@ -80,7 +80,7 @@ jobs:
           set -e
           for file in $(find src -type f -path '*/manifest/*.yaml'); do
             echo "Validating $file"
-            kubeval "$file"
+            kube-linter lint "$file"
           done
 
       - name: Install Helm
