@@ -67,11 +67,21 @@ jobs:
           curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 
-      - name: Validate Helm charts
-        run: |
-          find ./helm-chart -type d -name 'Chart.yaml' -execdir echo "Linting directory: {}" \;
-          find ./helm-chart -type d -name 'Chart.yaml' -execdir helm lint . --debug -v=10 \;                            # helm lint ./helm-chart
+      # - name: Validate Helm charts
+      #   run: |
+      #     find ./helm-chart -type d -name 'Chart.yaml' -execdir echo "Linting directory: {}" \;
+      #     find ./helm-chart -type d -name 'Chart.yaml' -execdir helm lint . --debug -v=10 \;                            # helm lint ./helm-chart
         
+      - name: Lint Helm Charts
+        run: |
+          set -e
+          for dir in helm-chart/*; do
+            if [ -d "$dir" ] && [ -f "$dir/Chart.yaml" ]; then
+              echo "Linting chart in $dir"
+              helm lint "$dir"
+            fi
+          done  
+
   # setup:
   #   name: Setup Azure and Kubernetes Context
   #   runs-on: ubuntu-latest
