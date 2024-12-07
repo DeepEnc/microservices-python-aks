@@ -107,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kubeconfig
-          path: .kube/config
+          path: kubeconfig
 
   deploy:
     name: Deploy to Kubernetes
@@ -121,7 +121,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: kubeconfig
-          path: .kube/
+          path: kubeconfig
 
       - name: Deploy Helm Charts for Databases
         run: |
@@ -147,3 +147,8 @@ jobs:
           for service in gateway-service converter-service notification-service auth-service; do
             kubectl rollout status deployment/$service-deployment -n $service
           done
+
+      - name: Use kubeconfig
+        run: |
+          export KUBECONFIG=$(pwd)/kubeconfig
+          kubectl get nodes
