@@ -101,7 +101,7 @@ jobs:
 
       - name: connect to AKS cluster
         run: |
-          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }}
+          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }}  --file kubeconfig
 
       - name: Save kubeconfig
         uses: actions/upload-artifact@v4
