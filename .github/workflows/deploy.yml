@@ -79,55 +79,71 @@ jobs:
           name: linting-results
           path: linting_results.txt
         
-  # setup:
-  #   name: Setup Azure and Kubernetes Context
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
+  setup:
+    name: Setup Azure and Kubernetes Context
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  #     - name: Log in with service principle to Azure
-  #       run: |
-  #         az login --service-principal --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_SECRET_ID }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+      - name: Log in with service principle to Azure
+        run: |
+          az login --service-principal --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_SECRET_ID }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
-  #     - name: creating resource group
-  #       run: |
-  #         az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
+      - name: creating resource group
+        run: |
+          az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
 
-  #     - name: creating azure aks
-  #       run: |
-  #         az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
-  #         az aks create --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} --location ${{ env.LOCATION }} --kubernetes-version 1.28.3 --tier standard --enable-cluster-autoscaler --node-count 2 --min-count 2 --max-count 5 --max-pods 110 --node-vm-size ${{ env.NODE_SIZE }} --network-plugin azure --network-policy azure --load-balancer-sku standard --enable-addons monitoring --generate-ssh-keys
+      - name: creating azure aks
+        run: |
+          az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
+          az aks create --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} --location ${{ env.LOCATION }} --kubernetes-version 1.28.3 --tier standard --enable-cluster-autoscaler --node-count 2 --min-count 2 --max-count 5 --max-pods 110 --node-vm-size ${{ env.NODE_SIZE }} --network-plugin azure --network-policy azure --load-balancer-sku standard --enable-addons monitoring --generate-ssh-keys
 
-  #     - name: connect to AKS cluster
-  #       run: |
-  #         az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }}
+      - name: connect to AKS cluster
+        run: |
+          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }}
 
-  #     - name: Save kubeconfig
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: kubeconfig
-  #         path: .kube/config
+      - name: Save kubeconfig
+        uses: actions/upload-artifact@v4
+        with:
+          name: kubeconfig
+          path: .kube/config
 
-  # deploy:
-  #   name: Deploy to Kubernetes
-  #   runs-on: ubuntu-latest
-  #   needs: setup
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  #     - name: Retrieve kubeconfig
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         name: kubeconfig
-  #         path: .kube/
+      - name: Retrieve kubeconfig
+        uses: actions/download-artifact@v4
+        with:
+          name: kubeconfig
+          path: .kube/
 
-  #     - name: Deploy Kubernetes Manifests
-  #       run: |
-  #         kubectl apply -f ./kubernetes-manifests
+      - name: Deploy Helm Charts for Databases
+        run: |
+          helm upgrade --install postgres helm-chart/Postgres \
+            --namespace database --create-namespace
 
-  #     - name: Verify Deployment
-  #       run: |
-  #         kubectl rollout status deployment/my-deployment -n production
-  #         kubectl get all -n production
+          helm upgrade --install rabbitmq helm-chart/RabbitMQ \
+            --namespace database --create-namespace
+
+          helm upgrade --install mongodb helm-chart/MongoDB \
+            --namespace database --create-namespace
+
+        # Step 5: Deploy Kubernetes manifests for services
+      - name: Deploy Kubernetes Manifests for Services
+        run: |
+          for service in gateway-service converter-service notification-service auth-service; do
+            kubectl apply -f src/$service/manifest
+          done
+  
+        # Step 6: Verify Deployment Rollout (Optional)
+      - name: Verify Deployment Rollout
+        run: |
+          for service in gateway-service converter-service notification-service auth-service; do
+            kubectl rollout status deployment/$service-deployment -n $service
+          done
