@@ -90,14 +90,36 @@ jobs:
         run: |
           az login --service-principal --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_SECRET_ID }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
-      - name: creating resource group
-        run: |
-          az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
+      # - name: creating resource group
+      #   run: |
+      #     az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
 
-      - name: creating azure aks
+      # - name: creating azure aks
+      #   run: |
+      #     az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
+      #     az aks create --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} --location ${{ env.LOCATION }} --kubernetes-version 1.28.3 --tier standard --enable-cluster-autoscaler --node-count 2 --min-count 2 --max-count 5 --max-pods 110 --node-vm-size ${{ env.NODE_SIZE }} --network-plugin azure --network-policy azure --load-balancer-sku standard --enable-addons monitoring --generate-ssh-keys
+
+      - name: Check if AKS Cluster Exists
+        id: aks_check
         run: |
-          az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
-          az aks create --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} --location ${{ env.LOCATION }} --kubernetes-version 1.28.3 --tier standard --enable-cluster-autoscaler --node-count 2 --min-count 2 --max-count 5 --max-pods 110 --node-vm-size ${{ env.NODE_SIZE }} --network-plugin azure --network-policy azure --load-balancer-sku standard --enable-addons monitoring --generate-ssh-keys
+          az aks show --resource-group ${{ secrets.RESOURCE_GROUP }} --name ${{ secrets.CLUSTER_NAME }} > /dev/null 2>&1
+          if [ $? -eq 0 ]; then
+            echo "AKS cluster already exists"
+            echo "cluster_exists=true" >> $GITHUB_ENV
+          else
+            echo "AKS cluster does not exist"
+            echo "cluster_exists=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create AKS Cluster if it does not exist
+        if: env.cluster_exists == 'false'
+        run: |
+          az aks create \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --name ${{ secrets.CLUSTER_NAME }} \
+            --node-count 1 \
+            --enable-addons monitoring \
+            --generate-ssh-keys
 
       - name: connect to AKS cluster
         run: |
