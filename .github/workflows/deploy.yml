@@ -102,7 +102,7 @@ jobs:
       - name: Check if AKS Cluster Exists
         id: aks_check
         run: |
-          az aks show --resource-group ${{ secrets.RESOURCE_GROUP }} --name ${{ secrets.CLUSTER_NAME }} > /dev/null 2>&1
+          az aks show --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} > /dev/null 2>&1
 
           if [ $? -eq 0 ]; then
             echo "Cluster exists"
@@ -116,8 +116,8 @@ jobs:
         if: env.cluster_exists == 'false'
         run: |
           az aks create \
-            --resource-group ${{ secrets.RESOURCE_GROUP }} \
-            --name ${{ secrets.CLUSTER_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name ${{ env.CLUSTER_NAME }} \
             --node-count 1 \
             --enable-addons monitoring \
             --generate-ssh-keys
