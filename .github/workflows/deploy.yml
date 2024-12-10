@@ -90,13 +90,12 @@ jobs:
         run: |
           az login --service-principal --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_SECRET_ID }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
-      # - name: creating resource group
-      #   run: |
-      #     az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
+      - name: creating resource group
+        run: |
+          az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
 
       # - name: creating azure aks
       #   run: |
-      #     az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
       #     az aks create --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} --location ${{ env.LOCATION }} --kubernetes-version 1.28.3 --tier standard --enable-cluster-autoscaler --node-count 2 --min-count 2 --max-count 5 --max-pods 110 --node-vm-size ${{ env.NODE_SIZE }} --network-plugin azure --network-policy azure --load-balancer-sku standard --enable-addons monitoring --generate-ssh-keys
 
       - name: Check if AKS Cluster Exists
