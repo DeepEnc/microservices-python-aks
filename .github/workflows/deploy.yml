@@ -102,16 +102,13 @@ jobs:
       - name: Check if AKS Cluster Exists
         id: aks_check
         run: |
-          az aks show --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} > /dev/null 2>&1
-
-          if [ $? -eq 0 ]; then
-            echo "Cluster exists"
+          if az aks show --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} > /dev/null 2>&1; then
+            echo "AKS cluster already exists."
             echo "cluster_exists=true" >> $GITHUB_ENV
           else
-            echo "Cluster does not exist"
+            echo "AKS cluster does not exist."
             echo "cluster_exists=false" >> $GITHUB_ENV
           fi
-
       - name: Create AKS Cluster if it does not exist
         if: env.cluster_exists == 'false'
         run: |
