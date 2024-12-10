@@ -152,7 +152,10 @@ jobs:
       - name: Set kubeconfig Environment Variable
         run: |
           echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
-
+      
+      - name: Verify Kubeconfig Context
+        run: kubectl config get-contexts
+        
       - name: Validate kubectl Connection
         run: |
           kubectl get namespaces
