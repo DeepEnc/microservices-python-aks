@@ -149,6 +149,11 @@ jobs:
         run: |
           export KUBECONFIG=$(pwd)/kubeconfig
 
+      - name: Validate kubectl Connection
+        run: |
+          kubectl get namespaces
+          kubectl get nodes
+
       - name: Deploy Helm Charts for Databases
         run: |
           helm upgrade --install postgres helm-chart/Postgres \
