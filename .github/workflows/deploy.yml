@@ -147,11 +147,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: kubeconfig
-          path: kubeconfig
+          path: ./
       
       - name: Set kubeconfig Environment Variable
         run: |
-          echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
+          export KUBECONFIG=$(pwd)/kubeconfig
+          # echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
       
       - name: Verify Kubeconfig Context
         run: kubectl config get-contexts
