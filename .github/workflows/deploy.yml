@@ -108,6 +108,7 @@ jobs:
             echo "AKS cluster does not exist."
             echo "cluster_exists=false" >> $GITHUB_ENV
           fi
+
       - name: Create AKS Cluster if it does not exist
         if: env.cluster_exists == 'false'
         run: |
@@ -120,14 +121,13 @@ jobs:
 
       - name: connect to AKS cluster
         run: |
-          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }}  --file kubeconfig
-          export KUBECONFIG=$(pwd)/kubeconfig
+          az aks get-credentials \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name ${{ env.CLUSTER_NAME }} \
+            --file kubeconfig
 
         env:
           AZURE_DEVOPS_EXT_AKS_USECLI: true
-
-        # env:
-            # KUBECONFIG: ${{ github.workspace }}/kubeconfig  
 
       - name: Save kubeconfig
         uses: actions/upload-artifact@v4
@@ -136,7 +136,7 @@ jobs:
           path: kubeconfig
 
   deploy:
-    name: Deploy to Kubernetes
+    name: Deploy to AKS
     runs-on: ubuntu-latest
     needs: setup
     steps:
