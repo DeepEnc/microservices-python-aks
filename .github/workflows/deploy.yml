@@ -121,9 +121,13 @@ jobs:
       - name: connect to AKS cluster
         run: |
           az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }}  --file kubeconfig
+          export KUBECONFIG=$(pwd)/kubeconfig
 
         env:
-            KUBECONFIG: ${{ github.workspace }}/kubeconfig  
+          AZURE_DEVOPS_EXT_AKS_USECLI: true
+
+        # env:
+            # KUBECONFIG: ${{ github.workspace }}/kubeconfig  
 
       - name: Save kubeconfig
         uses: actions/upload-artifact@v4
@@ -145,9 +149,9 @@ jobs:
           name: kubeconfig
           path: kubeconfig
       
-      - name: Set kubeconfig
+      - name: Set kubeconfig Environment Variable
         run: |
-          export KUBECONFIG=$(pwd)/kubeconfig
+          echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
 
       - name: Validate kubectl Connection
         run: |
