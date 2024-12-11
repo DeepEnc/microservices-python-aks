@@ -32,7 +32,7 @@ jobs:
           directory: src
           format: plain
           output-file: linting_results.txt
-        continue-on-error: true  # This allows the workflow to continue even if errors occur
+        continue-on-error: true
         id: lint
 
       - name: Check Linter Output
@@ -43,21 +43,6 @@ jobs:
           else
             echo "No linting errors found."
           fi
-
-      # - name: Install kubeval
-      #   run: |
-      #     curl -sLO https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
-      #     tar xf kubeval-linux-amd64.tar.gz
-      #     sudo mv kubeval /usr/local/bin/
-
-      # Validate Kubernetes Manifests
-      # - name: Validate Kubernetes Files
-      #   run: |
-      #     set -e
-      #     for file in $(find src -type f -path '*/manifest/*.yaml'); do
-      #       echo "Validating $file"
-      #       kubeval "$file"
-      #     done
 
       - name: Install Helm
         run: |
@@ -93,10 +78,6 @@ jobs:
       - name: creating resource group
         run: |
           az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }}
-
-      # - name: creating azure aks
-      #   run: |
-      #     az aks create --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} --location ${{ env.LOCATION }} --kubernetes-version 1.28.3 --tier standard --enable-cluster-autoscaler --node-count 2 --min-count 2 --max-count 5 --max-pods 110 --node-vm-size ${{ env.NODE_SIZE }} --network-plugin azure --network-policy azure --load-balancer-sku standard --enable-addons monitoring --generate-ssh-keys
 
       - name: Check if AKS Cluster Exists
         id: aks_check
@@ -173,14 +154,12 @@ jobs:
           helm upgrade --install mongodb helm-chart/MongoDB \
             --namespace database --create-namespace
 
-        # Step 5: Deploy Kubernetes manifests for services
       - name: Deploy Kubernetes Manifests for Services
         run: |
           for service in gateway-service converter-service notification-service auth-service; do
             kubectl apply -f src/$service/manifest
           done
   
-        # Step 6: Verify Deployment Rollout (Optional)
       - name: Verify Deployment Rollout
         run: |
           for service in gateway-service converter-service notification-service auth-service; do
